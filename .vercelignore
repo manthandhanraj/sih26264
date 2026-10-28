@@ -1,0 +1,16 @@
+data/
+tmp/
+output/
+qa-artifacts/
+node_modules/
+.env*
+.git/
+.vscode/
+.idea/
+.codex/
+.vercel/
+__pycache__/
+*.pyc
+*.log
+design-options/
+preview*.png

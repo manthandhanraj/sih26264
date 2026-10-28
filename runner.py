@@ -98,7 +98,7 @@ def find_server(folder, port):
 
 
 def check_node():
-    if any(not (ROOT / "node_modules" / package / "package.json").exists() for package in ("csv-parse", "read-excel-file")):
+    if any(not (ROOT / "node_modules" / package / "package.json").exists() for package in ("csv-parse", "read-excel-file", "@supabase/supabase-js")):
         raise RuntimeError("Required packages are missing. Run npm ci once in the project folder, then start again.")
     node = shutil.which("node")
     if not node:

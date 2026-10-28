@@ -1,10 +1,10 @@
-import {DatabaseSync} from 'node:sqlite';
 import {readFile,mkdir} from 'node:fs/promises';
 import path from 'node:path';
 import {DEMO_ACCOUNTS,hashPassword} from './auth.mjs';
 import {institutionProfiles} from './institutions.mjs';
 export const DEFAULT_SETTINGS={slaDays:{High:3,Medium:7,Low:14},remindBeforeDays:2,escalateAfterDays:1};
 export async function openStore(dataDir,initialCases){
+ const {DatabaseSync}=await import('node:sqlite');
  await mkdir(dataDir,{recursive:true});const db=new DatabaseSync(path.join(dataDir,'samanvay.sqlite'));db.exec(`PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON; PRAGMA busy_timeout=5000;
  CREATE TABLE IF NOT EXISTS cases(id TEXT PRIMARY KEY,owner_id TEXT,bureau TEXT,region TEXT,payload TEXT NOT NULL);
  CREATE INDEX IF NOT EXISTS cases_owner ON cases(owner_id);CREATE INDEX IF NOT EXISTS cases_bureau ON cases(bureau);
@@ -34,5 +34,9 @@ export async function openStore(dataDir,initialCases){
  function read(){const cases=db.prepare('SELECT payload FROM cases ORDER BY rowid DESC').all().map(x=>{const c=JSON.parse(x.payload);return {...c,transfers:c.transfers||[]};});return {cases,innovation:JSON.parse(db.prepare("SELECT value FROM meta WHERE key='innovation'").get()?.value||'{"passports":[],"policyRuns":[]}'),imports:db.prepare('SELECT payload FROM institution_imports ORDER BY rowid').all().map(r=>JSON.parse(r.payload)),institutions:institutionProfiles(cases,db.prepare('SELECT payload FROM institutions').all().map(x=>JSON.parse(x.payload))),reviews:db.prepare('SELECT payload FROM reviews').all().map(x=>JSON.parse(x.payload)),notifications:db.prepare('SELECT payload FROM notifications').all().map(x=>JSON.parse(x.payload)),settings:JSON.parse(db.prepare("SELECT value FROM meta WHERE key='settings'").get()?.value||JSON.stringify(DEFAULT_SETTINGS))};}
  function save(state){db.exec('BEGIN IMMEDIATE');try{db.exec('DELETE FROM cases; DELETE FROM reviews; DELETE FROM notifications; DELETE FROM institutions; DELETE FROM institution_imports;');const receipt=db.prepare('INSERT INTO institution_imports VALUES(?,?)');for(const r of state.imports||[])receipt.run(r.id,JSON.stringify(r));const profile=db.prepare('INSERT INTO institutions VALUES(?,?)');for(const p of institutionProfiles(state.cases,state.institutions||[]))profile.run(p.id,JSON.stringify(p));const insert=db.prepare('INSERT INTO cases VALUES(?,?,?,?,?)');for(const c of [...state.cases].reverse())insert.run(c.id,c.ownerId||'student',c.bureau,c.region,JSON.stringify(c));const review=db.prepare('INSERT INTO reviews VALUES(?,?)');for(const r of state.reviews)review.run(r.key,JSON.stringify(r));const notification=db.prepare('INSERT INTO notifications VALUES(?,?,?)');for(const n of state.notifications)notification.run(n.id,n.userId,JSON.stringify(n));db.prepare("INSERT OR REPLACE INTO meta(key,value) VALUES('settings',?)").run(JSON.stringify(state.settings));db.prepare("INSERT OR REPLACE INTO meta(key,value) VALUES('innovation',?)").run(JSON.stringify(state.innovation||{passports:[],policyRuns:[]}));db.exec('COMMIT');}catch(e){db.exec('ROLLBACK');throw e;}}
  const users=()=>db.prepare('SELECT payload,password_hash FROM users').all().map(r=>({...JSON.parse(r.payload),passwordHash:r.password_hash}));
- return {db,read,save,users,close:()=>db.close()};
+ return {db,read,save,users,close:()=>db.close(),
+  getSession:hash=>db.prepare('SELECT user_id,expires_at FROM sessions WHERE token_hash=?').get(hash),
+  startSession:({hash,userId,expiresAt,previous})=>{db.exec('BEGIN IMMEDIATE');try{if(previous)db.prepare('DELETE FROM sessions WHERE token_hash=?').run(previous);db.prepare('DELETE FROM sessions WHERE expires_at<?').run(Date.now());db.prepare('INSERT INTO sessions VALUES(?,?,?)').run(hash,userId,expiresAt);db.exec('COMMIT');}catch(e){db.exec('ROLLBACK');throw e;}},
+  endSession:hash=>db.prepare('DELETE FROM sessions WHERE token_hash=?').run(hash),
+ };
 }

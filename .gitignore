@@ -39,6 +39,11 @@ venv/
 /.vscode/
 /.idea/
 /.codex/
+/.vercel/
 .DS_Store
 Thumbs.db
 Desktop.ini
+.vercel
+.env*
+!.env.example
+!.env.sample

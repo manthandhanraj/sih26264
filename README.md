@@ -4,7 +4,7 @@ Developed by **Manthan Dhanraj**. A local, role-based institution complaint coor
 
 ## Run
 
-Requires **Node.js 24+**. Install the local CSV/Excel readers once with `npm ci`. No API key is needed.
+Requires **Node.js 24.x**. Install dependencies with `npm ci`. The local demo needs no API key.
 
 ```sh
 python runner.py
@@ -25,6 +25,8 @@ A server started separately using `npm start` or the older runner can be monitor
 `npm start` remains a foreground alternative; closing its terminal stops that process.
 
 ## Demo access
+
+For Vercel hosting with shared cloud casework, sessions and private evidence storage, follow [VERCEL_SETUP.md](VERCEL_SETUP.md). Cloud mode requires your own Supabase project and server-only environment variables; `runner.py` remains the local launcher.
 
 Six separate accounts are shown on the sign-in page with one-click Explore buttons and visible credentials. A **Demo accounts** button allows switching after login. See [DEMO_ACCOUNTS.md](DEMO_ACCOUNTS.md) for all passwords and a complete review walkthrough.
 
@@ -80,7 +82,7 @@ Full backups are saved in `data/backups/backup-*/`, with the database, evidence 
 
 ## Demo boundaries
 
-Demo credentials are intentionally public. This app binds to localhost and is not configured for public production deployment. It has no official AICTE integration, real email/SMS provider, malware scanning, account recovery, MFA or tamper-proof audit storage. Sessions use local HTTP cookies; a production deployment needs HTTPS/Secure cookies, privately provisioned accounts, rate-limit hardening, deployment security review and operational monitoring. No real personal data should be entered into this demo.
+Demo credentials are intentionally public. Local mode binds to localhost; the optional Vercel/Supabase mode serves a synthetic reviewer demo with shared sessions, HTTPS/Secure cookies, configured-origin checks and private evidence storage. It has no official AICTE integration, real email/SMS provider, malware scanning, account recovery, MFA or tamper-proof audit storage. A production service for real complaints still needs privately provisioned accounts, security review and operational monitoring. No real personal data should be entered into this demo. See [VERCEL_SETUP.md](VERCEL_SETUP.md) for polling, scheduling, backup and workload limits.
 
 ## Sharing the source on GitHub
 

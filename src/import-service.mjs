@@ -4,10 +4,10 @@ import {RequestError,text,REGIONS} from './validation.mjs';
 import {IMPORT_LIMITS,parseInWorker} from './import-file.mjs';
 import {IMPORT_FIELDS,suggestMapping,buildImportPlan} from './institution-import.mjs';
 
-export function createImportService({getState,transact,backup}){
+export function createImportService({getState,transact,backup,drafts=null}){
  const jobs=new Map();let reading=0;
  const expire=()=>{for(const [id,j] of jobs)if(j.expiresAt<Date.now())jobs.delete(id);};
- function jobFor(id,user){expire();const job=jobs.get(id);if(!job||job.userId!==user.id)throw new RequestError('Preview expired or is unavailable. Upload the file again.',410);return job;}
+ async function jobFor(id,user){expire();const job=drafts?await drafts.get(id,user.id):jobs.get(id);if(!job||job.userId!==user.id||job.expiresAt<Date.now())throw new RequestError('Preview expired or is unavailable. Upload the file again.',410);return job;}
  function response(job){return {id:job.id,revision:job.revision,fileName:job.fileName,expiresAt:job.expiresAt,sheets:job.sheets.map(s=>s.sheet),sheet:job.selected.sheet,headers:job.selected.headers,fields:IMPORT_FIELDS,regions:REGIONS,limits:IMPORT_LIMITS,...job.plan,signature:undefined};}
  return {async handle({route,req,res,user,body,reply}){
   if(route==='/api/institution-imports/template'&&req.method==='GET'){
@@ -20,7 +20,7 @@ export function createImportService({getState,transact,backup}){
   if(route==='/api/institution-imports'&&req.method==='GET'){return reply(res,200,{imports:(getState().imports||[]).filter(r=>r.userId===user.id).slice(-20).reverse()}),true;}
   if(route==='/api/institution-imports/preview'&&req.method==='POST'){
    const input=await body(req);let job;
-   if(input.previewId){job=jobFor(input.previewId,user);}
+   if(input.previewId){job=await jobFor(input.previewId,user);}
    else {
     expire();if(reading>=2)throw new RequestError('Two files are being read. Try again shortly.',429);
     const fileName=text(input.fileName,'File name',1,150).split(/[\\/]/).at(-1);
@@ -35,13 +35,13 @@ export function createImportService({getState,transact,backup}){
    const selected=input.sheet===undefined?job.selected||job.sheets[0]:job.sheets.find(s=>s.sheet===input.sheet);
    if(!selected)throw new RequestError('Choose an available workbook sheet.');
    const mapping=input.mapping||suggestMapping(selected.headers),plan=buildImportPlan(selected,mapping,input.defaultRegion||'',getState().institutions);
-   job.selected=selected;job.plan=plan;job.revision++;jobs.set(job.id,job);return reply(res,200,response(job)),true;
+   const expected=job.revision;job.selected=selected;job.plan=plan;job.revision++;if(drafts)await drafts.put(job,expected);else jobs.set(job.id,job);return reply(res,200,response(job)),true;
   }
   const commit=route.match(/^\/api\/institution-imports\/([a-f0-9-]+)\/commit$/);
   if(commit&&req.method==='POST'){
    const input=await body(req),id=commit[1],existing=(getState().imports||[]).find(r=>r.id===id&&r.userId===user.id);
    if(existing)return reply(res,200,{receipt:existing,replayed:true}),true;
-   const job=jobFor(id,user),revision=job.revision,plan=job.plan;
+   const job=await jobFor(id,user),revision=job.revision,plan=job.plan;
    if(input.revision!==revision)throw new RequestError('The preview changed. Review the latest preview before saving.',409);
    if(!plan.summary.ready)throw new RequestError('No valid new rows to import. Correct the file or mapping first.');
    const backupId=await backup();
@@ -54,8 +54,8 @@ export function createImportService({getState,transact,backup}){
     for(const {record} of added)next.institutions.push({...record,version:1,importedAt:at,importedBy:user.name,importId:id,provenance:{fileName:job.fileName,sheet:job.selected.sheet,sha256:job.hash,source:record.source,academicYear:record.academicYear}});
     const result={id,userId:user.id,userName:user.name,fileName:job.fileName,sheet:job.selected.sheet,sha256:job.hash,at,added:added.length,skipped:current.rows.length-added.length,institutionIds:added.map(r=>r.record.id),backupId};
     next.imports||=[];next.imports.push(result);return result;
-   });
-   jobs.delete(id);return reply(res,201,{receipt}),true;
+   },{draft:{id,revision,userId:user.id}});
+   if(!drafts)jobs.delete(id);return reply(res,201,{receipt}),true;
   }
   return false;
  }};

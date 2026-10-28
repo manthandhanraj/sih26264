@@ -6,16 +6,21 @@
   "scripts": {
     "start": "node server.mjs",
     "test": "node --test",
-    "demo:check": "node scripts/check-demo.mjs"
+    "demo:check": "node scripts/check-demo.mjs",
+    "cloud:setup": "node scripts/prepare-cloud-env.mjs",
+    "cloud:check": "node --env-file-if-exists=.env.local scripts/check-cloud-config.mjs",
+    "cloud:migrate": "node --env-file-if-exists=.env.local scripts/migrate-to-supabase.mjs"
   },
   "engines": {
-    "node": ">=24"
+    "node": "24.x"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.118.0",
     "csv-parse": "^7.0.3",
     "read-excel-file": "^9.3.12"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.13",
     "linkedom": "^0.18.14"
   }
 }

@@ -23,7 +23,7 @@ Open http://127.0.0.1:3000 and choose an **Explore** button. Each account has a 
 6. Resolve the case with an action note. The complainant can rate the outcome or request reopening.
 7. Enter as Admin to inspect SLA policy, run a check and create/download a database backup.
 
-These accounts and public passwords are intentionally provided for a localhost synthetic demo. They are not official AICTE credentials. Do not expose this demo publicly or use real complaint data.
+These accounts and public passwords are intentionally provided for the synthetic reviewer demo. They are not official AICTE credentials. The optional Vercel/Supabase hosting keeps the same reviewer accounts; do not use real complaint data or treat these public passwords as private production access. See [VERCEL_SETUP.md](VERCEL_SETUP.md).
 
 ## Authority boundaries
 

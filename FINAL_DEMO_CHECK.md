@@ -1,10 +1,10 @@
-# Final demo check — 26 October 2026
+# Final demo check — 28 October 2026
 
-**Automated workflows and live account checks pass. Rendered desktop/mobile review remains pending.**
+**Automated workflows, local checks and production cloud API checks pass. A fresh rendered desktop/mobile review remains pending.**
 
 ## Verified
 
-- `npm test`: **97 passed, 0 failed**, including 12 offline screen/form tests.
+- `npm test`: **114 passed, 0 failed**, including 17 cloud checks and 12 offline screen/form tests. All 3 Python launcher lifecycle checks also passed.
 - `npm run demo:check`: all six public demo accounts authenticated on the running local app; case safeguards, internal-data privacy and authority boundaries passed.
 - The live check preserved the **15 existing complaints**. It added no complaint, action, evidence, dependency or policy-run records.
 - New workflows are exercised on isolated synthetic test databases, including persistence after server restart.
@@ -48,7 +48,7 @@ The remaining manual pass is:
 - On a narrow mobile view, check the same navigation, forms, case tabs, dropdowns, tables and dialogs for horizontal page overflow, obscured buttons and unreadable text. Tables may scroll within their containers.
 - Capture desktop and mobile views of **Coordination lab** and a case's **Safeguards** tab to finish the visual review.
 
-Do not mark the complete desktop/mobile walkthrough as passed until that rendered check has been performed. No deployment or PPT work was started in this task.
+Do not mark the complete desktop/mobile walkthrough as passed until that rendered check has been performed. The 26 October frontend check did not include deployment. The 28 October cloud verification below supersedes that deployment status; it does not claim a new rendered browser walkthrough.
 
 ## Repeatable checks
 
@@ -59,3 +59,14 @@ python runner.py --status
 ```
 
 The live audit writes `qa-artifacts/demo-live-check.json`, with account counts and results but no passwords or session cookies. The launcher lifecycle tests passed in the preceding safeguards upgrade; they were not repeated for this frontend-only fix.
+
+
+## Production cloud verification · 28 October 2026
+
+The synthetic reviewer demo is live at **https://sih26264.vercel.app** on Vercel, using shared Supabase PostgreSQL, private evidence storage and shared sessions. Migration preserved the 15 complaints, 11 institutions, 6 accounts and 1 existing evidence file. Local SQLite/evidence remain available with a private before-migration export under `data/backups/`.
+
+Real cloud storage passed a full 5 MB signed upload/download, upload CORS, digest comparison, anonymous-read denial and test-file cleanup. The cloud-backed API passed all six login, authority/privacy, safeguards, evidence-download and logout checks. A private cloud backup was created and its snapshot verified. The public production URL passed the same six-account checks and retained all complaint IDs.
+
+Private environment files and local databases/evidence were excluded from the deployment upload. Production server/maintenance keys are stored as Vercel Secret variables. The local upload plan contained empty ignored-directory markers, but no private file contents or environment files.
+
+Reports: ignored `qa-artifacts/cloud-storage-live-check.json`, `cloud-api-live-check.json` and `cloud-app-live-check.json`. These are API/storage checks; they do not establish fresh rendered desktop/mobile signoff. See `VERCEL_SETUP.md` for polling, scheduled-job and prototype workload limits.
