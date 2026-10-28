@@ -1,0 +1,21 @@
+{
+  "name": "samanvay-sih26264",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test",
+    "demo:check": "node scripts/check-demo.mjs"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "dependencies": {
+    "csv-parse": "^7.0.3",
+    "read-excel-file": "^9.3.12"
+  },
+  "devDependencies": {
+    "linkedom": "^0.18.14"
+  }
+}

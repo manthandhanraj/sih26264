@@ -1,0 +1,18 @@
+export const STATUSES=['New','In progress','Awaiting response','Escalated','Resolved'];
+export const BUREAUS=['PGRC','Regulation Bureau','Regional Office'];
+export const CATEGORIES=['Student grievance','Faculty grievance','Fee refund','Intake compliance','Infrastructure','Approval status'];
+export const REGIONS=['North','South','East','West','Central','North East','Not specified'];
+export class RequestError extends Error {constructor(message,status=400){super(message);this.status=status;}}
+export function object(v){if(!v||typeof v!=='object'||Array.isArray(v))throw new RequestError('Request must be a JSON object.');return v;}
+export function text(v,label,min=1,max=200){if(typeof v!=='string'||v.trim().length<min||v.trim().length>max)throw new RequestError(`${label} must contain ${min}–${max} characters.`);return v.trim();}
+export function choice(v,allowed,label){if(!allowed.includes(v))throw new RequestError(`Choose a valid ${label}.`);return v;}
+export const indiaDate=(date=new Date())=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Kolkata',year:'numeric',month:'2-digit',day:'2-digit'}).format(date);
+export function dueDate(v){if(typeof v!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(v)||!Number.isFinite(Date.parse(v))||new Date(v).toISOString().slice(0,10)!==v)throw new RequestError('Choose a valid due date.');return v;}
+export function createInput(value){const b=object(value);const id=text(b.institutionId,'Institution ID',2,60).toUpperCase();if(!/^[A-Z0-9][A-Z0-9-]*$/.test(id))throw new RequestError('Institution ID can contain letters, numbers and hyphens.');return {title:text(b.title,'Title',5,200),description:text(b.description,'Description',15,5000),institution:text(b.institution,'Institution name',3,200),institutionId:id,category:choice(b.category,CATEGORIES,'category'),bureau:choice(b.bureau,BUREAUS,'bureau'),priority:choice(b.priority,['High','Medium','Low'],'priority'),region:choice(b.region||'Not specified',REGIONS,'region')};}
+export function updateInput(value,current){const b=object(value);if(!Number.isInteger(b.version)||b.version!==current.version)throw new RequestError('This case changed in another session. Refresh the case before saving.',409);const changes={},actions=[];
+ for(const [key,allowed,label] of [['status',STATUSES,'status'],['bureau',BUREAUS,'bureau'],['priority',['High','Medium','Low'],'priority']]){if(b[key]!==undefined){choice(b[key],allowed,label);if(b[key]!==current[key]){changes[key]=b[key];actions.push(`${label}: ${current[key]} → ${b[key]}`);}}}
+ if(b.officer!==undefined){const officer=text(b.officer,'Officer',2,80);if(officer!==current.officer){changes.officer=officer;actions.push(`Assigned officer: ${officer}`);}}
+ if(b.dueDate!==undefined){const date=dueDate(b.dueDate);if(date!==current.dueDate){if(date<indiaDate())throw new RequestError('A new deadline cannot be in the past.');changes.dueDate=date;actions.push(`Deadline: ${current.dueDate} → ${date}`);}}
+ if(b.nextAction!==undefined){const value=b.nextAction===''?'':text(b.nextAction,'Next action',5,500);if(value!==current.nextAction){changes.nextAction=value;actions.push(value?'Next action recorded: '+value:'Next action cleared');}}
+ const note=b.note===undefined||b.note===''?'':text(b.note,'Action note',1,2000);if((changes.bureau||changes.status==='Resolved'||changes.dueDate)&&note.length<10)throw new RequestError('Add a note of at least 10 characters for a transfer, resolution or deadline change.');if(note)actions.push(note);if(!actions.length)throw new RequestError('Choose a change or add an action note.');return {changes,action:actions.join('. ')};
+}

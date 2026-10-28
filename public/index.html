@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#302117"><meta name="description" content="Samanvay — connected institution complaint management. Developed by Manthan Dhanraj."><title>Samanvay · Complaint Intelligence</title><link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/designs.css"></head>
+<body data-design="sandstone">
+ <section id="auth-screen" aria-label="Sign in"></section>
+ <div id="workspace-shell" hidden>
+ <a class="skip-link" href="#page-heading">Skip to workspace</a>
+ <aside class="sidebar">
+  <a class="brand" href="/#overview"><span class="brand-mark">s<span>↗</span></span><span>samanvay<small>CONNECTED GOVERNANCE</small></span></a>
+  <div class="workspace"><span class="square" data-icon="shield"></span><div>AICTE workspace<small>Institution case management</small></div><span class="live-dot"></span></div>
+  <div class="nav-label">YOUR WORKSPACE</div>
+  <nav aria-label="Workspace navigation">
+   <button class="nav" data-view="institutions"><span data-icon="cases"></span>Institutions</button>
+   <button class="nav active" data-view="overview"><span data-icon="grid"></span>Overview</button>
+   <button class="nav" data-view="cases"><span data-icon="cases"></span><span class="nav-text">All complaints</span><b id="nav-count">—</b></button>
+   <button class="nav" data-view="overlaps"><span data-icon="link"></span>Related cases<b id="overlap-count">—</b></button>
+   <button class="nav" data-view="alerts"><span data-icon="clock"></span>Deadline alerts</button>
+   <button class="nav" data-view="innovation"><span data-icon="shield"></span>Coordination lab</button>
+   <button class="nav" data-view="reports"><span data-icon="chart"></span>Reports & insights</button>
+  </nav>
+  <div class="sidebar-note"><div class="orbit">✳</div><strong>Progress starts<br>with connection.</strong><p>One shared workspace.<br>No case left between desks.</p><span>SIH 2026 <i>·</i> PS 26264</span></div>
+  <div class="profile"><span class="avatar">WO</span><div id="account-summary">Workspace officer<small>Local demo session</small></div><button id="logout" aria-label="Sign out" title="Sign out">↗</button></div>
+ </aside>
+ <main>
+  <header><div class="breadcrumb">Workspace <span>/</span><strong id="crumb">Overview</strong></div><div class="top-right"><button id="demo-accounts" class="refresh-button">Demo accounts</button><span class="demo-pill"><span class="live-dot"></span><span id="role-label">Demo workspace</span></span><button id="inbox-button" class="refresh-button" aria-label="Open notifications">Inbox <b id="inbox-count">0</b></button><button id="refresh" class="refresh-button" aria-label="Refresh workspace"><span data-icon="refresh"></span><span>Refresh</span></button></div></header>
+  <div class="content">
+   <div class="page-title"><div><div class="eyebrow"><span></span>INSTITUTION COMPLAINT INTELLIGENCE</div><h1 id="page-heading" tabindex="-1">Your workspace, in sync.</h1><p id="page-subtitle">A shared view of every complaint. Clear ownership, from intake to resolution.</p></div><button class="primary" id="new-case"><span data-icon="plus"></span>Register complaint</button></div>
+   <div id="error" role="alert" hidden></div>
+   <section id="stats" class="stats" aria-label="Complaint statistics"></section>
+   <section id="overlap-banner" aria-label="Related case attention"></section>
+   <div id="view-content"><div class="panel loading">Loading your workspace…</div></div>
+   <footer><span><span class="live-dot"></span><span id="sync-label">Connecting…</span> · IST</span><span>Developed by Manthan Dhanraj · Local demo</span></footer>
+  </div>
+ </main>
+ </div>
+ <dialog id="case-dialog" aria-labelledby="case-dialog-title" class="case-workspace"><div id="case-details"></div></dialog>
+ <dialog id="new-dialog" aria-labelledby="new-title"><form id="new-form">
+  <div class="dialog-heading"><div><div class="eyebrow">A NEW PATH TO RESOLUTION</div><h2 id="new-title">Register a complaint</h2></div><button type="button" class="icon-button close-dialog" aria-label="Close registration"><span data-icon="close"></span></button></div>
+  <p class="muted">Capture the issue, identify the institution and route it to the right desk. All fields are required.</p>
+  <label>Complaint title<input name="title" required minlength="5" maxlength="200" placeholder="A short, specific summary"></label>
+  <div class="form-grid">
+   <label>AICTE permanent ID<input name="institutionId" required minlength="2" maxlength="60" pattern="[A-Za-z0-9][A-Za-z0-9-]*" placeholder="e.g. 1-438291"><small id="institution-hint">Use the institution’s AICTE permanent ID.</small></label>
+   <label>Institution name<input name="institution" required minlength="3" maxlength="200" placeholder="Full institution name"></label>
+   <label>Complaint category<select name="category"><option>Student grievance</option><option>Faculty grievance</option><option>Fee refund</option><option>Intake compliance</option><option>Infrastructure</option><option>Approval status</option></select></label>
+   <label>Responsible bureau<select name="bureau"><option>PGRC</option><option>Regulation Bureau</option><option>Regional Office</option></select></label>
+   <label>Priority<select name="priority"><option>Medium</option><option>High</option><option>Low</option></select></label>
+   <label>Region<select name="region"><option>North</option><option>South</option><option>East</option><option>West</option><option>Central</option><option>North East</option></select></label>
+  </div>
+  <label>Description<textarea name="description" required minlength="15" maxlength="5000" rows="4" placeholder="What happened? Include the relevant context and expected action."></textarea><small>Use synthetic details in this local demo. You can attach supporting evidence after registration.</small></label>
+  <div class="intake-note"><span data-icon="clock"></span><span>Priority-based SLA: high 3, medium 7, low 14 days by default. Admin can configure these deadlines.</span></div>
+  <p id="form-error" class="inline-error" role="alert"></p><div class="dialog-actions"><button type="button" class="secondary close-dialog">Cancel</button><button class="primary" type="submit">Create complaint<span data-icon="arrow"></span></button></div>
+ </form></dialog>
+ <div id="toast" role="status" aria-live="polite"></div>
+ <script type="module" src="/app.js"></script>
+</body></html>
