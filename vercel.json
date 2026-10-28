@@ -1,0 +1,15 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "outputDirectory": "public",
+  "buildCommand": "node scripts/check-cloud-config.mjs --build",
+  "functions": {
+    "api/index.mjs": {
+      "maxDuration": 60,
+      "includeFiles": "{public/**,templates/**,src/matching-model.json,src/import-file.mjs}",
+      "excludeFiles": "{data/**,tmp/**,output/**,qa-artifacts/**,test/**,design-options/**}"
+    }
+  },
+  "routes": [{"src":"/(.*)","dest":"/api/index.mjs"}],
+  "crons": [{"path":"/api/cron","schedule":"20 2 * * *"}]
+}

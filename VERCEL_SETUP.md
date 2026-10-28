@@ -52,6 +52,8 @@ Use the repository root containing `package.json`, `api/` and `vercel.json`.
 | Build Command | From `vercel.json`: `node scripts/check-cloud-config.mjs --build` |
 | Output Directory | `public` |
 
+Keep `vercel.json` committed in Git; confirm that `git ls-files vercel.json` returns its name before pushing. For an existing project, also change the saved Framework Preset to **Other**. A project still configured as Node can select the local `server.mjs` entry point and fail at runtime with `Invalid export found` instead of invoking `api/index.mjs`. After correcting the preset and committing the configuration, redeploy the current Git commit and check the live API; a Ready build alone is insufficient.
+
 In Vercel's **Environment Variables**, add the same five variable names/values from `.env.local` to **Production**. Do not put secrets in `vercel.json`. Initially leave Preview unconfigured; a preview needs its own matching public origin and preferably a separate Supabase project, so test changes do not modify production data.
 
 Commit/push the source changes and redeploy after setting the variables. Do not use `runner.py` or `npm start` as the Vercel build command. `api/index.mjs` is the serverless request handler; it opens no listening port and creates no local database/lock files.
